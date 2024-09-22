@@ -1,7 +1,15 @@
 import pygame
 
 pygame.init()
-screen = pygame.display.set_mode((640, 480))
+
+height = 640
+width = 480
+
+screen = pygame.display.set_mode((height, width))
+
+square_height = height / 8
+square_width = width / 8
+
 clock = pygame.time.Clock()
 
 running = True
@@ -12,6 +20,20 @@ while running:
             running = false
 
     screen.fill("gray")
+
+    color = (0, 0, 0)
+
+    for i in range(0, 8):
+        for j in range(0, 8):
+            actual_block = pygame.Rect(
+                square_height * i,
+                square_width * j,
+                square_height,
+                square_width,
+            )
+
+            pygame.draw.rect(screen, color, actual_block, 2)
+
     pygame.display.flip()
     clock.tick(60)
 
