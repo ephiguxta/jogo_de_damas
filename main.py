@@ -9,6 +9,8 @@ width = 480
 
 screen = pygame.display.set_mode((height, width))
 
+# cada posição da mesa possui um tamanho fixo, o tabuleiro
+# é composto por 8x8 posições
 square_height = height / 8
 square_width = width / 8
 
@@ -25,6 +27,8 @@ while running:
 
     color = (0, 0, 0)
 
+    # desenha todas os 64 quadrados que representam
+    # as posições da mesa
     for i in range(0, 8):
         for j in range(0, 8):
             actual_block = pygame.Rect(
@@ -34,6 +38,7 @@ while running:
                 square_width,
             )
 
+            # screen, color, pygame.Rect, tamanho da borda
             pygame.draw.rect(screen, color, actual_block, 2)
 
     pygame.display.flip()
