@@ -23,6 +23,24 @@ mouse_pos = 0
 board = []
 
 
+def draw_circle(i, j, center):
+    color = 0
+
+    if board[i][j] == 0:
+        return
+
+    if board[i][j] == 1:
+        color = (255, 0, 0)
+
+    elif board[i][j] == 2:
+        color = (0, 0, 255)
+
+    # o círculo precisa iniciar no centro do quadrado
+    center = (center[0] + (square_height / 2), center[1] + (square_width / 2))
+
+    pygame.draw.circle(screen, color, center, 20)
+
+
 def block_color(i, j):
     """
     retorna a cor do bloco correspondente a seu endereço,
@@ -32,10 +50,10 @@ def block_color(i, j):
 
     color = 0
     if ((i + j) % 2) == 0:
-        color = (0, 0, 0)
+        color = (255, 255, 255)
         return color
 
-    color = (255, 255, 255)
+    color = (0, 0, 0)
     return color
 
 
@@ -75,15 +93,17 @@ def draw_board():
         for j in range(0, 8):
             color = block_color(i, j)
 
+            center = (square_height * i, square_width * j)
+
             actual_block = pygame.Rect(
-                square_height * i,
-                square_width * j,
+                center[0],
+                center[1],
                 square_height,
                 square_width,
             )
 
-            # screen, color, pygame.Rect, tamanho da borda
             pygame.draw.rect(screen, color, actual_block)
+            draw_circle(i, j, center)
 
 
 create_board()
