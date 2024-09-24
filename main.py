@@ -18,17 +18,16 @@ clock = pygame.time.Clock()
 
 running = True
 
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = false
+mouse_pos = 0
 
-    screen.fill("gray")
 
-    color = (0, 0, 0)
-
+def draw_board():
     # desenha todas os 64 quadrados que representam
     # as posições da mesa
+
+    screen.fill("gray")
+    color = (0, 0, 0)
+
     for i in range(0, 8):
         for j in range(0, 8):
             actual_block = pygame.Rect(
@@ -40,6 +39,18 @@ while running:
 
             # screen, color, pygame.Rect, tamanho da borda
             pygame.draw.rect(screen, color, actual_block, 2)
+
+
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = false
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_pos = pygame.mouse.get_pos()
+            print(mouse_pos)
+
+    draw_board()
 
     pygame.display.flip()
     clock.tick(60)
