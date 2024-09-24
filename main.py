@@ -23,6 +23,22 @@ mouse_pos = 0
 board = []
 
 
+def block_color(i, j):
+    """
+    retorna a cor do bloco correspondente a seu endereço,
+    por exemplo se ele for um block de posição de movimento
+    válido, ele colore de verde.
+    """
+
+    color = 0
+    if ((i + j) % 2) == 0:
+        color = (0, 0, 0)
+        return color
+
+    color = (255, 255, 255)
+    return color
+
+
 def create_board():
     # cria as 8x8 posições do tabuleiro preenchidas com zero
     for i in range(8):
@@ -54,10 +70,11 @@ def draw_board():
     # as posições da mesa
 
     screen.fill("gray")
-    color = (0, 0, 0)
 
     for i in range(0, 8):
         for j in range(0, 8):
+            color = block_color(i, j)
+
             actual_block = pygame.Rect(
                 square_height * i,
                 square_width * j,
@@ -66,7 +83,7 @@ def draw_board():
             )
 
             # screen, color, pygame.Rect, tamanho da borda
-            pygame.draw.rect(screen, color, actual_block, 2)
+            pygame.draw.rect(screen, color, actual_block)
 
 
 create_board()
