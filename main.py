@@ -23,6 +23,29 @@ mouse_pos = 0
 board = []
 
 
+def move_piece_to_block(piece_to_move_addr, clicked_block):
+    movements = player_moves(piece_to_move_addr)
+
+    # limpa a figura da peça que vai ser movida
+    i, j = piece_to_move_addr
+    board[i][j] = 0
+
+    # limpa os 'x' da board
+    for i, j in movements:
+        board[i][j] = 0
+
+    i, j = clicked_block
+    board[i][j] = 1
+
+    print(board)
+
+
+def find_piece_addr():
+    for i in range(8):
+        if "a" in board[i]:
+            return (i, board[i].index("a"))
+
+
 def check_movement():
     """
     se o usuário clicar em uma peça e for uma peça que pode se mover,
@@ -38,13 +61,16 @@ def check_movement():
     # a variável "faça o movimento" se torna true
     for i in range(8):
         if "x" in board[i]:
-            print(board)
             do_the_move = True
             break
 
     # isso significa que esse click é apenas para gerar os caminhos
     # que a peça pode percorrer e colorir eles
     if do_the_move == False:
+
+        # TODO: atribuir 'b' quanfor for o jogador 2
+        board[clicked_block[0]][clicked_block[1]] = "a"
+
         movements = player_moves(clicked_block)
 
         if movements != []:
@@ -52,9 +78,12 @@ def check_movement():
             draw_rectangle(movements)
 
     # o caminho que foi clicado deve ser checado, esse bloco possui
-    # um 'x' indicando que a peça pode se mover para lá?!
+    # um 'x' indicando que a peça pode se mover para lá!
     else:
-        pass
+        mark = board[clicked_block[0]][clicked_block[1]]
+        if mark == "x":
+            piece_to_move_addr = find_piece_addr()
+            move_piece_to_block(piece_to_move_addr, clicked_block)
 
 
 def mark_user_move(movements):
@@ -89,14 +118,16 @@ def player_moves(block_addr):
     # verifica se o movimento na diagonal pra cima é válido
     if (up_r[0] >= 0 and up_r[0] <= 7) and (up_r[1] >= 0 and up_r[1] <= 7):
         # esquerda -> direita
-        if board[up_r[0]][up_r[1]] == 0:
+        path = board[up_r[0]][up_r[1]]
+        if path == 0 or path == "x":
             movements.append(up_r)
 
     # diagonal pra baixo
     if (down_r[0] >= 0 and down_r[0] <= 7) and (
         down_r[1] >= 0 and down_r[1] <= 7
     ):
-        if board[down_r[0]][down_r[1]] == 0:
+        path = board[down_r[0]][down_r[1]]
+        if path == 0 or path == "x":
             movements.append(down_r)
 
     return movements
@@ -169,14 +200,15 @@ def circle_color(i, j):
     """
 
     color = ()
+    addr = board[i][j]
 
-    if board[i][j] == 0:
+    if addr == 0:
         return
 
-    if board[i][j] == 1:
+    if addr == 1 or addr == "a":
         color = (255, 0, 0)
 
-    elif board[i][j] == 2:
+    elif addr == 2 or addr == "b":
         color = (0, 0, 255)
 
     return color
@@ -221,12 +253,14 @@ def block_color(i, j):
     return color
 
 
-def create_board():
+def create_matrix_board():
     # cria as 8x8 posições do tabuleiro preenchidas com zero
     for i in range(8):
         list = [0] * 8
         board.append(list)
 
+
+def create_board():
     # armazena o endereço da primeira peça da linha
     first_piece_addr = 0
 
@@ -266,11 +300,13 @@ def draw_board():
                 square_width,
             )
 
-            pygame.draw.rect(screen, color, actual_block)
+            if board[i][j] == 0:
+                pygame.draw.rect(screen, color, actual_block)
 
 
-create_board()
+create_matrix_board()
 draw_board()
+create_board()
 
 while running:
     for event in pygame.event.get():
@@ -280,7 +316,9 @@ while running:
         if event.type == pygame.MOUSEBUTTONDOWN:
             check_movement()
 
+    draw_board()
     draw_circle()
+
     pygame.display.flip()
 
     clock.tick(60)
