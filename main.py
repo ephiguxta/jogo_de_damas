@@ -35,8 +35,17 @@ def draw_rectangle():
     # pega o valor referente a aquela posição do tabuleiro, é 0, 1 ou 2?
     addr = board[block_addr[0]][block_addr[1]]
     if addr != 0:
-        print(addr)
+        center = (block_addr[0] * square_height, block_addr[1] * square_width)
 
+        gray_rectangle = pygame.Rect(
+                center[0],
+                center[1],
+                square_height,
+                square_width,
+        )
+
+        color = (100, 100, 100)
+        pygame.draw.rect(screen, color, gray_rectangle, 4)
 
 def target_piece(mouse_pos):
     """
@@ -135,6 +144,8 @@ def draw_board():
         for j in range(0, 8):
             color = block_color(i, j)
 
+            # FIXME: esse trecho até o pygame.draw.rect() pode ser
+            # transformado em uma função
             center = (square_height * i, square_width * j)
 
             actual_block = pygame.Rect(
@@ -149,6 +160,7 @@ def draw_board():
 
 
 create_board()
+draw_board()
 
 while running:
     for event in pygame.event.get():
@@ -157,8 +169,6 @@ while running:
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             draw_rectangle()
-
-    draw_board()
 
     pygame.display.flip()
     clock.tick(60)
