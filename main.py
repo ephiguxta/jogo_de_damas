@@ -23,15 +23,68 @@ mouse_pos = 0
 board = []
 
 
-def player_moves(block_addr, tag):
+def check_movement():
+    """
+    se o usuário clicar em uma peça e for uma peça que pode se mover,
+    começamos a rotina de preencher com 'x' as posições de movimento e
+    colorir essas posições com um retângulo cinza
+    """
+
+    mouse_pos = pygame.mouse.get_pos()
+    clicked_block = target_piece(pygame.mouse.get_pos())
+    do_the_move = False
+
+    # caso o tabuleiro esteja marcado com possíveis movimentos,
+    # a variável "faça o movimento" se torna true
+    for i in range(8):
+        if "x" in board[i]:
+            print(board)
+            do_the_move = True
+            break
+
+    # isso significa que esse click é apenas para gerar os caminhos
+    # que a peça pode percorrer e colorir eles
+    if do_the_move == False:
+        movements = player_moves(clicked_block)
+
+        if movements != []:
+            mark_user_move(movements)
+            draw_rectangle(movements)
+
+    # o caminho que foi clicado deve ser checado, esse bloco possui
+    # um 'x' indicando que a peça pode se mover para lá?!
+    else:
+        pass
+
+
+def mark_user_move(movements):
+    """
+    marca com 'x' onde o usuário pode clicar após selecionar a peça
+    """
+
+    for i in range(len(movements)):
+        row = movements[i][0]
+        col = movements[i][1]
+
+        board[row][col] = "x"
+
+
+# TODO: movimentos para o jogar vermelho (2)
+def player_moves(block_addr):
     """
     verifica se a peça que foi clicada pelo jogador possui movimentos
-    válidos, caso haja a função retorna uma lista com as ações válidas
+    válidos, caso haja, a função retorna uma lista com as ações válidas
     """
+
+    movements = []
+
+    # caso o usuário clique em um espaço vazio
+    pos = (block_addr[0], block_addr[1])
+    if board[pos[0]][pos[1]] == 0:
+        return movements
 
     up_r = (block_addr[0] + 1, block_addr[1] - 1)
     down_r = (block_addr[0] + 1, block_addr[1] + 1)
-    movements = []
 
     # verifica se o movimento na diagonal pra cima é válido
     if (up_r[0] >= 0 and up_r[0] <= 7) and (up_r[1] >= 0 and up_r[1] <= 7):
@@ -49,41 +102,35 @@ def player_moves(block_addr, tag):
     return movements
 
 
-def draw_rectangle():
+def draw_rectangle(valid_moves):
     """
-    após o evento do clique acontecer, checa se o usuário clicou em
-    uma peça válida
+    desenha um retângulo cinza na peça clicada e nos blocos
+    para onde ela pode se mover
     """
 
     mouse_pos = pygame.mouse.get_pos()
     block_addr = target_piece(mouse_pos)
 
-    # pega o valor referente a aquela posição do tabuleiro, é 0, 1 ou 2?
-    tag = board[block_addr[0]][block_addr[1]]
+    center = (block_addr[0] * square_height, block_addr[1] * square_width)
 
-    if tag != 0:
-        valid_moves = player_moves(block_addr, tag)
-        if valid_moves == []:
-            return
+    gray_rectangle = pygame.Rect(
+        center[0],
+        center[1],
+        square_height,
+        square_width,
+    )
 
-        center = (block_addr[0] * square_height, block_addr[1] * square_width)
+    color = (100, 100, 100)
 
-        gray_rectangle = pygame.Rect(
-            center[0],
-            center[1],
-            square_height,
-            square_width,
-        )
+    # desenha um retângulo cinza na peça que vai se mover
+    pygame.draw.rect(screen, color, gray_rectangle, 4)
 
-        color = (100, 100, 100)
+    # pega o endereço de onde as peças podem ir e as colore com
+    # retângulo cinza
+    for i in valid_moves:
+        gray_rectangle[0] = i[0] * square_height
+        gray_rectangle[1] = i[1] * square_width
         pygame.draw.rect(screen, color, gray_rectangle, 4)
-
-        # pega o endereço de onde as peças podem ir e as colore com
-        # retângulo cinza
-        for i in range(len(valid_moves)):
-            gray_rectangle[0] = valid_moves[i][0] * square_height
-            gray_rectangle[1] = valid_moves[i][1] * square_width
-            pygame.draw.rect(screen, color, gray_rectangle, 4)
 
 
 def target_piece(mouse_pos):
@@ -115,8 +162,13 @@ def target_piece(mouse_pos):
     return None
 
 
-def draw_circle(i, j, center):
-    color = 0
+def circle_color(i, j):
+    """
+    função de suporte ao draw_circle,
+    ela define a cor do círculo a ser desenhado
+    """
+
+    color = ()
 
     if board[i][j] == 0:
         return
@@ -127,10 +179,30 @@ def draw_circle(i, j, center):
     elif board[i][j] == 2:
         color = (0, 0, 255)
 
-    # o círculo precisa iniciar no centro do quadrado
-    center = (center[0] + (square_height / 2), center[1] + (square_width / 2))
+    return color
 
-    pygame.draw.circle(screen, color, center, 20)
+
+def draw_circle():
+
+    for i in range(8):
+        for j in range(8):
+            # como essa função fica no loop principal, quando o usuário
+            # vai se mover aquela posição válida na board fica marcada
+            # com 'x', isso serve para não desenhar
+            if board[i][j] == "x":
+                continue
+
+            target = board[i][j]
+            if target == 1 or target == 2:
+                color = circle_color(i, j)
+                # o círculo precisa iniciar no centro do quadrado
+                center = (square_height * i, square_width * j)
+                center = (
+                    center[0] + (square_height / 2),
+                    center[1] + (square_width / 2),
+                )
+
+                pygame.draw.circle(screen, color, center, 20)
 
 
 def block_color(i, j):
@@ -195,7 +267,6 @@ def draw_board():
             )
 
             pygame.draw.rect(screen, color, actual_block)
-            draw_circle(i, j, center)
 
 
 create_board()
@@ -207,9 +278,11 @@ while running:
             running = False
 
         if event.type == pygame.MOUSEBUTTONDOWN:
-            draw_rectangle()
+            check_movement()
 
+    draw_circle()
     pygame.display.flip()
+
     clock.tick(60)
 
 pygame.quit
