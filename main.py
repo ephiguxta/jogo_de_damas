@@ -156,7 +156,7 @@ while running:
             running = False
 
         if event.type == pygame.MOUSEBUTTONDOWN:
-            draw_retangle()
+            draw_rectangle()
 
     draw_board()
 
