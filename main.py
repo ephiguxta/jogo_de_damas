@@ -36,8 +36,7 @@ def move_piece_to_block(piece_to_move_addr, clicked_block):
 
     i, j = clicked_block
     board[i][j] = 1
-
-    print(board)
+    draw_rectangle(None)
 
 
 def find_piece_addr():
@@ -52,6 +51,8 @@ def check_movement():
     começamos a rotina de preencher com 'x' as posições de movimento e
     colorir essas posições com um retângulo cinza
     """
+
+    print(board)
 
     mouse_pos = pygame.mouse.get_pos()
     clicked_block = target_piece(pygame.mouse.get_pos())
@@ -69,13 +70,15 @@ def check_movement():
     if do_the_move == False:
 
         # TODO: atribuir 'b' quanfor for o jogador 2
-        board[clicked_block[0]][clicked_block[1]] = "a"
 
         movements = player_moves(clicked_block)
 
         if movements != []:
+            board[clicked_block[0]][clicked_block[1]] = "a"
             mark_user_move(movements)
             draw_rectangle(movements)
+        else:
+            return
 
     # o caminho que foi clicado deve ser checado, esse bloco possui
     # um 'x' indicando que a peça pode se mover para lá!
@@ -152,6 +155,14 @@ def draw_rectangle(valid_moves):
     )
 
     color = (100, 100, 100)
+
+    # se o parâmetro passado for None, significa que
+    # uma peça foi movida para uma nova posição e a borda
+    # precisa ser preta
+    if valid_moves is None:
+        color = (0, 0, 0)
+        pygame.draw.rect(screen, color, gray_rectangle, 4)
+        return
 
     # desenha um retângulo cinza na peça que vai se mover
     pygame.draw.rect(screen, color, gray_rectangle, 4)
