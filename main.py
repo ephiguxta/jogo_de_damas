@@ -62,7 +62,8 @@ def draw_rectangle():
     tag = board[block_addr[0]][block_addr[1]]
 
     if tag != 0:
-        if player_moves(block_addr, tag) == []:
+        valid_moves = player_moves(block_addr, tag)
+        if valid_moves == []:
             return
 
         center = (block_addr[0] * square_height, block_addr[1] * square_width)
@@ -76,7 +77,13 @@ def draw_rectangle():
 
         color = (100, 100, 100)
         pygame.draw.rect(screen, color, gray_rectangle, 4)
-        player_moves(block_addr, tag)
+
+        # pega o endereço de onde as peças podem ir e as colore com
+        # retângulo cinza
+        for i in range(len(valid_moves)):
+            gray_rectangle[0] = valid_moves[i][0] * square_height
+            gray_rectangle[1] = valid_moves[i][1] * square_width
+            pygame.draw.rect(screen, color, gray_rectangle, 4)
 
 
 def target_piece(mouse_pos):
