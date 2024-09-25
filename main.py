@@ -23,6 +23,32 @@ mouse_pos = 0
 board = []
 
 
+def player_moves(block_addr, tag):
+    """
+    verifica se a peça que foi clicada pelo jogador possui movimentos
+    válidos, caso haja a função retorna uma lista com as ações válidas
+    """
+
+    up_r = (block_addr[0] + 1, block_addr[1] - 1)
+    down_r = (block_addr[0] + 1, block_addr[1] + 1)
+    movements = []
+
+    # verifica se o movimento na diagonal pra cima é válido
+    if (up_r[0] >= 0 and up_r[0] <= 7) and (up_r[1] >= 0 and up_r[1] <= 7):
+        # esquerda -> direita
+        if board[up_r[0]][up_r[1]] == 0:
+            movements.append(up_r)
+
+    # diagonal pra baixo
+    if (down_r[0] >= 0 and down_r[0] <= 7) and (
+        down_r[1] >= 0 and down_r[1] <= 7
+    ):
+        if board[down_r[0]][down_r[1]] == 0:
+            movements.append(down_r)
+
+    return movements
+
+
 def draw_rectangle():
     """
     após o evento do clique acontecer, checa se o usuário clicou em
@@ -33,19 +59,25 @@ def draw_rectangle():
     block_addr = target_piece(mouse_pos)
 
     # pega o valor referente a aquela posição do tabuleiro, é 0, 1 ou 2?
-    addr = board[block_addr[0]][block_addr[1]]
-    if addr != 0:
+    tag = board[block_addr[0]][block_addr[1]]
+
+    if tag != 0:
+        if player_moves(block_addr, tag) == []:
+            return
+
         center = (block_addr[0] * square_height, block_addr[1] * square_width)
 
         gray_rectangle = pygame.Rect(
-                center[0],
-                center[1],
-                square_height,
-                square_width,
+            center[0],
+            center[1],
+            square_height,
+            square_width,
         )
 
         color = (100, 100, 100)
         pygame.draw.rect(screen, color, gray_rectangle, 4)
+        player_moves(block_addr, tag)
+
 
 def target_piece(mouse_pos):
     """
