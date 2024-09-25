@@ -23,6 +23,50 @@ mouse_pos = 0
 board = []
 
 
+def draw_rectangle():
+    """
+    após o evento do clique acontecer, checa se o usuário clicou em
+    uma peça válida
+    """
+
+    mouse_pos = pygame.mouse.get_pos()
+    block_addr = target_piece(mouse_pos)
+
+    # pega o valor referente a aquela posição do tabuleiro, é 0, 1 ou 2?
+    addr = board[block_addr[0]][block_addr[1]]
+    if addr != 0:
+        print(addr)
+
+
+def target_piece(mouse_pos):
+    """
+    pega o quadrado do tabuleiro que o usuário clicou
+    e retorna em formato de tupla
+    """
+
+    # os valores vão de 1 a 8
+    for i in range(1, 9):
+        for j in range(1, 9):
+            last_x = i * square_height
+            last_y = j * square_width
+
+            # verifica o intervalo do tamanho de square_* e "decodifica" onde o
+            # usuário clicou
+            if (
+                mouse_pos[0] <= last_x
+                and mouse_pos[0] >= last_x - square_height
+            ) and (
+                mouse_pos[1] <= last_y
+                and mouse_pos[1] >= last_y - square_height
+            ):
+                # o -1 serve para mostrar o valor real, pois o índice começa
+                # em zero
+                block = (i - 1, j - 1)
+                return block
+
+    return None
+
+
 def draw_circle(i, j, center):
     color = 0
 
@@ -87,8 +131,6 @@ def draw_board():
     # desenha todas os 64 quadrados que representam
     # as posições da mesa
 
-    screen.fill("gray")
-
     for i in range(0, 8):
         for j in range(0, 8):
             color = block_color(i, j)
@@ -107,15 +149,16 @@ def draw_board():
 
 
 create_board()
-draw_board()
 
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            running = false
+            running = False
 
         if event.type == pygame.MOUSEBUTTONDOWN:
-            mouse_pos = pygame.mouse.get_pos()
+            draw_retangle()
+
+    draw_board()
 
     pygame.display.flip()
     clock.tick(60)
