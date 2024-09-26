@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from math import sqrt
 import pygame
 
 pygame.init()
@@ -32,11 +33,35 @@ def remove_movement_junk():
                 board[i][j] = 0
 
 
+def beaten_piece(piece_to_move_addr, clicked_block):
+    old = (piece_to_move_addr[0], piece_to_move_addr[1])
+    new = (clicked_block[0], clicked_block[1])
+    print(f"{old} {new}")
+
+    target = [0, 0]
+    target[0] = (old[0] + new[0]) // 2
+    target[1] = (old[1] + new[1]) // 2
+
+    print(f"{(target[0],target[1])} {board[target[0]][target[1]]}")
+
+    return target
+
+
 def move_piece_to_block(piece_to_move_addr, clicked_block):
     global player
 
     # limpa a figura da peça que vai ser movida
     i, j = piece_to_move_addr
+
+    # distância euclidiana da origem ao destino
+    dist = sqrt(((i - clicked_block[0]) ** 2) + ((j - clicked_block[1]) ** 2))
+    piece_to_remove = None
+    if dist >= 2:
+        # recebe o "ponto médio" caso seja uma ação de eliminar a outra peça
+        # e remove a peça do adversário
+        piece_to_remove = beaten_piece(piece_to_move_addr, clicked_block)
+        board[piece_to_remove[0]][piece_to_remove[1]] = 0
+
     # salva qual é a peça, 1 ou 2?
     tag = board[i][j]
     board[i][j] = 0
