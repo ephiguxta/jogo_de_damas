@@ -7,6 +7,8 @@ pygame.init()
 height = 640
 width = 480
 
+player = 1
+
 screen = pygame.display.set_mode((height, width))
 
 # cada posição da mesa possui um tamanho fixo, o tabuleiro
@@ -16,6 +18,7 @@ square_width = width / 8
 
 clock = pygame.time.Clock()
 
+
 running = True
 
 mouse_pos = 0
@@ -24,10 +27,14 @@ board = []
 
 
 def move_piece_to_block(piece_to_move_addr, clicked_block):
+    global player
+
     movements = player_moves(piece_to_move_addr)
 
     # limpa a figura da peça que vai ser movida
     i, j = piece_to_move_addr
+    # salva qual é a peça, 1 ou 2?
+    tag = board[i][j]
     board[i][j] = 0
 
     # limpa os 'x' da board
@@ -35,14 +42,34 @@ def move_piece_to_block(piece_to_move_addr, clicked_block):
         board[i][j] = 0
 
     i, j = clicked_block
-    board[i][j] = 1
+
+    if tag == "a":
+        board[i][j] = 1
+    elif tag == "b":
+        board[i][j] = 2
+
     draw_rectangle(None)
+
+    # vai mudando a variável global para que cada player
+    # tenha a sua jogada
+    if player == 1:
+        player = 2
+    else:
+        player = 1
 
 
 def find_piece_addr():
+    global player
+
+    tag = 0
+    if player == 1:
+        tag = "a"
+    else:
+        tag = "b"
+
     for i in range(8):
-        if "a" in board[i]:
-            return (i, board[i].index("a"))
+        if tag in board[i]:
+            return (i, board[i].index(tag))
 
 
 def check_movement():
@@ -52,11 +79,17 @@ def check_movement():
     colorir essas posições com um retângulo cinza
     """
 
-    print(board)
+    global player
 
     mouse_pos = pygame.mouse.get_pos()
     clicked_block = target_piece(pygame.mouse.get_pos())
     do_the_move = False
+
+    piece = board[clicked_block[0]][clicked_block[1]]
+    if player == 1 and piece == 2:
+        return
+    elif player == 2 and piece == 1:
+        return
 
     # caso o tabuleiro esteja marcado com possíveis movimentos,
     # a variável "faça o movimento" se torna true
@@ -70,11 +103,16 @@ def check_movement():
     if do_the_move == False:
 
         # TODO: atribuir 'b' quanfor for o jogador 2
-
         movements = player_moves(clicked_block)
 
         if movements != []:
-            board[clicked_block[0]][clicked_block[1]] = "a"
+            tag = 0
+            if player == 1:
+                tag = "a"
+            else:
+                tag = "b"
+
+            board[clicked_block[0]][clicked_block[1]] = tag
             mark_user_move(movements)
             draw_rectangle(movements)
         else:
@@ -101,6 +139,25 @@ def mark_user_move(movements):
         board[row][col] = "x"
 
 
+def check_move_limits(up, down):
+    movements = []
+
+    # verifica se o movimento na diagonal pra cima é válido
+    if (up[0] >= 0 and up[0] <= 7) and (up[1] >= 0 and up[1] <= 7):
+        path = board[up[0]][up[1]]
+        if path == 0 or path == "x":
+            movements.append(up)
+
+    # diagonal pra baixo
+    if (down[0] >= 0 and down[0] <= 7) and (down[1] >= 0 and down[1] <= 7):
+        path = board[down[0]][down[1]]
+
+        if path == 0 or path == "x":
+            movements.append(down)
+
+    return movements
+
+
 # TODO: movimentos para o jogar vermelho (2)
 def player_moves(block_addr):
     """
@@ -115,23 +172,19 @@ def player_moves(block_addr):
     if board[pos[0]][pos[1]] == 0:
         return movements
 
-    up_r = (block_addr[0] + 1, block_addr[1] - 1)
-    down_r = (block_addr[0] + 1, block_addr[1] + 1)
+    # Player 1
+    if player == 1:
+        up_r = (block_addr[0] + 1, block_addr[1] - 1)
+        down_r = (block_addr[0] + 1, block_addr[1] + 1)
 
-    # verifica se o movimento na diagonal pra cima é válido
-    if (up_r[0] >= 0 and up_r[0] <= 7) and (up_r[1] >= 0 and up_r[1] <= 7):
-        # esquerda -> direita
-        path = board[up_r[0]][up_r[1]]
-        if path == 0 or path == "x":
-            movements.append(up_r)
+        movements = check_move_limits(up_r, down_r)
 
-    # diagonal pra baixo
-    if (down_r[0] >= 0 and down_r[0] <= 7) and (
-        down_r[1] >= 0 and down_r[1] <= 7
-    ):
-        path = board[down_r[0]][down_r[1]]
-        if path == 0 or path == "x":
-            movements.append(down_r)
+    # Player 2
+    else:
+        up_l = (block_addr[0] - 1, block_addr[1] - 1)
+        down_l = (block_addr[0] - 1, block_addr[1] + 1)
+
+        movements = check_move_limits(up_l, down_l)
 
     return movements
 
