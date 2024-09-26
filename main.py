@@ -18,7 +18,6 @@ square_width = width / 8
 
 clock = pygame.time.Clock()
 
-
 running = True
 
 mouse_pos = 0
@@ -26,10 +25,15 @@ mouse_pos = 0
 board = []
 
 
+def remove_movement_junk():
+    for i in range(8):
+        for j in range(8):
+            if board[i][j] == "x":
+                board[i][j] = 0
+
+
 def move_piece_to_block(piece_to_move_addr, clicked_block):
     global player
-
-    movements = player_moves(piece_to_move_addr)
 
     # limpa a figura da peça que vai ser movida
     i, j = piece_to_move_addr
@@ -38,8 +42,7 @@ def move_piece_to_block(piece_to_move_addr, clicked_block):
     board[i][j] = 0
 
     # limpa os 'x' da board
-    for i, j in movements:
-        board[i][j] = 0
+    remove_movement_junk()
 
     i, j = clicked_block
 
@@ -139,21 +142,67 @@ def mark_user_move(movements):
         board[row][col] = "x"
 
 
+# TODO: vários pontos dessa função ser refatoradas
+# em funções suporte
 def check_move_limits(up, down):
+    global player
+
     movements = []
 
     # verifica se o movimento na diagonal pra cima é válido
     if (up[0] >= 0 and up[0] <= 7) and (up[1] >= 0 and up[1] <= 7):
         path = board[up[0]][up[1]]
-        if path == 0 or path == "x":
+        # if path == 0 or path == "x":
+        if path == 0:
             movements.append(up)
+
+        # se for uma peça inimiga, há como derrotá-la?
+        if player != path and path != 0:
+            invalid_move = False
+            i, j = (0, 0)
+
+            if player == 1:
+                i, j = (up[0] + 1, up[1] - 1)
+                if (i > 7 or i < 0) or (j > 7 or j < 0):
+                    invalid_move = True
+
+            else:
+                i, j = (up[0] - 1, up[1] - 1)
+                if (i > 7 or i < 0) or (j > 7 or j < 0):
+                    invalid_move = True
+
+            if invalid_move != True:
+                valid_space = board[i][j]
+                if valid_space == 0:
+                    movements.append((i, j))
 
     # diagonal pra baixo
     if (down[0] >= 0 and down[0] <= 7) and (down[1] >= 0 and down[1] <= 7):
         path = board[down[0]][down[1]]
 
-        if path == 0 or path == "x":
+        # if path == 0 or path == "x":
+        if path == 0:
             movements.append(down)
+
+        if player != path and path != 0:
+            invalid_move = False
+
+            i, j = (0, 0)
+
+            if player == 1:
+                i, j = (down[0] + 1, down[1] + 1)
+                if (i > 7 or i < 0) or (j > 7 or j < 0):
+                    invalid_move = True
+
+            else:
+                i, j = (down[0] - 1, down[1] + 1)
+                if (i > 7 or i < 0) or (j > 7 or j < 0):
+                    invalid_move = True
+
+            if invalid_move != True:
+                valid_space = board[i][j]
+                if valid_space == 0:
+                    movements.append((i, j))
 
     return movements
 
@@ -378,6 +427,7 @@ while running:
             running = False
 
         if event.type == pygame.MOUSEBUTTONDOWN:
+            print(board)
             check_movement()
 
     draw_board()
